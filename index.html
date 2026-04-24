@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Treino Lucas Morais</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #f2f2f7; --card-bg: #ffffff;
@@ -13,29 +14,25 @@
 
         body { font-family: -apple-system, system-ui, sans-serif; background-color: #e5e5ea; margin: 0; padding: 0; display: flex; justify-content: center; }
 
-        /* TIMER FLUTUANTE NA BASE */
+        /* TIMER NO RODAPÉ */
         #timer-container {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 100%; max-width: 450px; 
-            background: rgba(28, 28, 30, 0.95); 
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            color: white; padding: 15px 20px; 
-            box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
-            padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* Ajuste para barra do iPhone */
+            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; padding: 15px 20px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
-        #timer-display { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 70px; }
+        #timer-display { font-size: 22px; font-weight: 800; min-width: 70px; }
         .timer-controls { display: flex; gap: 6px; }
-        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; }
         .timer-finished { animation: pulse-red 1s infinite; }
         @keyframes pulse-red { 0% { background: rgba(28,28,30,0.95); } 50% { background: #ff3b30; } 100% { background: rgba(28,28,30,0.95); } }
         #timer-progress { position: absolute; top: 0; left: 0; height: 3px; background: var(--push); width: 0%; transition: width 1s linear; }
 
         .container {
             width: 100%; max-width: 450px; background-color: var(--bg); min-height: 100vh;
-            padding: 20px; padding-bottom: 120px; /* Aumentado para o timer não cobrir o footer */
-            box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
+            padding: 20px; padding-bottom: 150px; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
             display: flex; flex-direction: column;
         }
 
@@ -56,7 +53,7 @@
         .card { background: var(--card-bg); border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .ex-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .ex-nome { font-weight: 700; font-size: 15px; color: #1c1c1e; }
-        .btn-edit-name { background: none; border: none; font-size: 12px; opacity: 0.3; padding: 0; }
+        .btn-edit-name { background: none; border: none; font-size: 12px; opacity: 0.3; }
 
         .serie-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; background: #f8f8fa; padding: 6px; border-radius: 10px; }
         .serie-num { font-size: 9px; font-weight: 800; color: #aeaeb2; width: 20px; text-align: center; }
@@ -70,7 +67,10 @@
         .btn-hist { background: #f2f2f7; color: #007AFF; }
 
         .vol-ex-txt { font-size: 10px; color: #aeaeb2; margin-top: 8px; text-align: right; font-weight: 600; }
-        .hist-box { display: none; margin-top: 10px; font-size: 10px; padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 10px; }
+        
+        /* BOX HISTÓRICO E GRÁFICO */
+        .hist-box { display: none; margin-top: 15px; padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 12px; }
+        .chart-container { width: 100%; height: 180px; margin-bottom: 10px; }
 
         .seg .dia-titulo { color: var(--push); }
         .ter .dia-titulo { color: var(--pull); }
@@ -84,16 +84,6 @@
 </head>
 <body>
 
-    <div class="container">
-        <div class="header-app">
-            <div class="subtitle">Chikorita Gym</div>
-            <h1>Meu Treino</h1>
-        </div>
-        
-        <div id="app"></div>
-        <footer>produced by Lucas Morais</footer>
-    </div>
-
     <div id="timer-container">
         <div id="timer-progress"></div>
         <div id="timer-display">00:00</div>
@@ -103,6 +93,15 @@
             <button class="timer-btn" onclick="customTimer()">Alt</button>
             <button class="timer-btn" style="background:#ff3b30" onclick="resetTimer()">✕</button>
         </div>
+    </div>
+
+    <div class="container">
+        <div class="header-app">
+            <div class="subtitle">Chikorita Gym</div>
+            <h1>Meu Treino</h1>
+        </div>
+        <div id="app"></div>
+        <footer>produced by Lucas Morais</footer>
     </div>
 
     <script>
@@ -117,7 +116,9 @@
 
         let countdown;
         let timerTotal;
+        const charts = {}; // Para armazenar as instâncias dos gráficos
 
+        // FUNÇÕES DO TIMER
         function startTimer(seconds) {
             resetTimer();
             timerTotal = seconds;
@@ -132,12 +133,10 @@
                 const secs = timeLeft % 60;
                 display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 progress.style.width = `${((timerTotal - timeLeft) / timerTotal) * 100}%`;
-
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     container.classList.add('timer-finished');
                     display.innerText = "BORA!";
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             }, 1000);
         }
@@ -150,10 +149,11 @@
         }
 
         function customTimer() {
-            const val = prompt("Segundos de descanso:");
+            const val = prompt("Segundos:");
             if (val) startTimer(parseInt(val));
         }
 
+        // LÓGICA DO APP
         const diaHojeNum = new Date().getDay();
         const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
         const diaHojeKey = diasMap[diaHojeNum] || "seg";
@@ -169,32 +169,31 @@
                 html += `
                 <div class="dia-secao ${key} ${taAberto}" id="secao-${key}">
                     <div class="dia-header" onclick="${temExercicios ? `toggleDia('${key}')` : ''}">
-                        <div>
-                            <div class="dia-titulo">${dia.t}</div>
-                            ${temExercicios ? `<span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span>` : '<span style="font-size:10px; color:#aeaeb2">Descanso 😴</span>'}
-                        </div>
+                        <div><div class="dia-titulo">${dia.t}</div><span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span></div>
                         ${temExercicios ? '<span class="seta">▼</span>' : ''}
                     </div>
                     <div class="dia-conteudo">`;
                 
                 dia.l.forEach((exOriginal, idx) => {
-                    const idUnico = `${key}-ex-${idx}`;
-                    const exNome = localStorage.getItem(`${idUnico}-name`) || exOriginal;
-                    const series = JSON.parse(localStorage.getItem(`${idUnico}-series`) || "[{}]");
+                    const idU = `${key}-ex-${idx}`;
+                    const exNome = localStorage.getItem(`${idU}-name`) || exOriginal;
+                    const series = JSON.parse(localStorage.getItem(`${idU}-series`) || "[{}]");
+                    const h = JSON.parse(localStorage.getItem(`${idU}-h`) || "[]");
+                    const meta = h.length > 0 ? h[0] : null; // Pega o último treino do histórico
                     
                     html += `
                     <div class="card">
-                        <div class="ex-header">
-                            <span class="ex-nome" id="label-${idUnico}">${exNome}</span>
-                            <button class="btn-edit-name" onclick="editName('${idUnico}')">✏️</button>
-                        </div>
-                        <div id="cont-${idUnico}">${series.map((s, i) => renderSerie(idUnico, i, s.c, s.r)).join('')}</div>
-                        <div class="vol-ex-txt" id="vol-ex-${idUnico}">Volume: 0kg</div>
+                        <div class="ex-header"><span class="ex-nome" id="label-${idU}">${exNome}</span><button class="btn-edit-name" onclick="editName('${idU}')">✏️</button></div>
+                        <div id="cont-${idU}">${series.map((s, i) => renderSerie(idU, i, s.c, s.r, meta)).join('')}</div>
+                        <div class="vol-ex-txt" id="vol-ex-${idU}">Volume: 0kg</div>
                         <div class="controls">
-                            <button class="btn btn-add" onclick="addS('${idUnico}')">+ Série</button>
-                            <button class="btn btn-hist" onclick="toggleH('${idUnico}')">Histórico</button>
+                            <button class="btn btn-add" onclick="addS('${idU}')">+ Série</button>
+                            <button class="btn btn-hist" onclick="toggleH('${idU}', '${key}')">Histórico 📊</button>
                         </div>
-                        <div id="h-${idUnico}" class="hist-box"></div>
+                        <div id="h-${idU}" class="hist-box">
+                            <div class="chart-container"><canvas id="chart-${idU}"></canvas></div>
+                            <div id="lista-h-${idU}"></div>
+                        </div>
                     </div>`;
                 });
                 html += `</div></div>`;
@@ -205,27 +204,29 @@
 
         window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
 
-        window.renderSerie = (id, i, c, r) => `
+        window.renderSerie = (id, i, c, r, meta) => {
+            // Se houver meta do histórico, coloca como placeholder
+            let pCarga = (meta && meta.s && meta.s[i]) ? meta.s[i].c : "0";
+            let pReps = (meta && meta.s && meta.s[i]) ? meta.s[i].r : "0";
+            return `
             <div class="serie-row">
                 <div class="serie-num">${i+1}º</div>
-                <div class="input-group"><label>Carga</label><input type="number" placeholder="0" value="${c||''}" oninput="calcAll()"></div>
-                <div class="input-group"><label>Reps</label><input type="number" placeholder="0" value="${r||''}" oninput="calcAll()"></div>
+                <div class="input-group"><label>Carga</label><input type="number" placeholder="${pCarga}" value="${c||''}" oninput="calcAll()"></div>
+                <div class="input-group"><label>Reps</label><input type="number" placeholder="${pReps}" value="${r||''}" oninput="calcAll()"></div>
                 <button style="border:none; background:none; color:#ff3b30; font-size:16px;" onclick="remS('${id}', this)">×</button>
             </div>`;
+        }
 
         window.editName = (id) => {
             event.stopPropagation();
-            const oldName = document.getElementById(`label-${id}`).innerText;
-            const newName = prompt("Nome do exercício:", oldName);
-            if (newName) {
-                localStorage.setItem(`${id}-name`, newName);
-                document.getElementById(`label-${id}`).innerText = newName;
-            }
+            const old = document.getElementById(`label-${id}`).innerText;
+            const res = prompt("Nome:", old);
+            if(res){ localStorage.setItem(`${id}-name`, res); document.getElementById(`label-${id}`).innerText = res; }
         };
 
         window.addS = (id) => {
             const cont = document.getElementById(`cont-${id}`);
-            cont.insertAdjacentHTML('beforeend', renderSerie(id, cont.children.length, '', ''));
+            cont.insertAdjacentHTML('beforeend', renderSerie(id, cont.children.length, '', '', null));
         };
 
         window.remS = (id, btn) => { btn.parentElement.remove(); calcAll(); };
@@ -238,36 +239,69 @@
                     const cont = document.getElementById(`cont-${id}`);
                     if(!cont) return;
                     let volEx = 0, seriesData = [];
-                    cont.querySelectorAll('.serie-row').forEach((row) => {
+                    cont.querySelectorAll('.serie-row').forEach(row => {
                         const c = parseFloat(row.querySelectorAll('input')[0].value) || 0;
                         const r = parseFloat(row.querySelectorAll('input')[1].value) || 0;
                         volEx += (c * r);
                         seriesData.push({c, r});
                     });
-                    document.getElementById(`vol-ex-${id}`).innerText = `Volume: ${volEx.toLocaleString()}kg`;
+                    document.getElementById(`vol-ex-${id}`).innerText = `Vol: ${volEx.toLocaleString()}kg`;
                     volDia += volEx;
                     localStorage.setItem(`${id}-series`, JSON.stringify(seriesData));
                     if(volEx > 0) {
                         const hoje = new Date().toLocaleDateString('pt-BR');
                         let h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]");
-                        if(h.length === 0 || h[0].d !== hoje) h.unshift({d: hoje, v: volEx});
-                        else h[0] = {d: hoje, v: volEx};
-                        localStorage.setItem(`${id}-h`, JSON.stringify(h.slice(0,5)));
+                        if(h.length === 0 || h[0].d !== hoje) h.unshift({d: hoje, v: volEx, s: seriesData});
+                        else h[0] = {d: hoje, v: volEx, s: seriesData};
+                        localStorage.setItem(`${id}-h`, JSON.stringify(h.slice(0,10)));
                     }
                 });
-                const volBadge = document.getElementById(`vol-dia-${diaKey}`);
-                if(volBadge) volBadge.innerText = `Vol: ${volDia.toLocaleString()}kg`;
+                const vb = document.getElementById(`vol-dia-${diaKey}`);
+                if(vb) vb.innerText = `Vol: ${volDia.toLocaleString()}kg`;
             });
         };
 
-        window.toggleH = (id) => {
-            const d = document.getElementById(`h-${id}`);
-            if(d.style.display === 'block') d.style.display = 'none';
-            else {
-                const h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]");
-                d.innerHTML = h.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>${i.d}</strong> <span>${i.v.toLocaleString()}kg</span></div>`).join('') || "Sem dados.";
-                d.style.display = 'block';
-            }
+        window.toggleH = (id, corKey) => {
+            const box = document.getElementById(`h-${id}`);
+            if(box.style.display === 'block') { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+
+            const h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]").reverse(); // Reverte para o gráfico ir da esq para dir
+            const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+            const cores = { seg: '#007AFF', ter: '#5856D6', qua: '#34C759', qui: '#8e8e93', sex: '#FF9500', sab: '#FF2D55' };
+
+            if(charts[id]) charts[id].destroy();
+
+            charts[id] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: h.map(i => i.d.split('/')[0] + '/' + i.d.split('/')[1]),
+                    datasets: [{
+                        label: 'Volume (kg)',
+                        data: h.map(i => i.v),
+                        borderColor: cores[corKey],
+                        backgroundColor: cores[corKey] + '22',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: false, grid: { display: false }, ticks: { font: { size: 9 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                    }
+                }
+            });
+
+            document.getElementById(`lista-h-${id}`).innerHTML = h.reverse().map(i => `
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; border-top:1px solid #eee; padding-top:4px;">
+                    <strong>${i.d}</strong> <span>${i.v.toLocaleString()} kg</span>
+                </div>`).join('');
         };
 
         renderApp();
