@@ -68,7 +68,6 @@
         label { font-size: 8px; text-transform: uppercase; color: #8e8e93; font-weight: 700; margin-bottom: 2px; display: block; }
         input { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 15px; text-align: center; box-sizing: border-box; }
 
-        /* OBSERVAÇÃO */
         .obs-input { width: 100%; background: none; border: none; border-bottom: 1px solid #eee; font-size: 11px; color: #666; padding: 5px 0; margin-top: 10px; text-align: left; font-style: italic; }
 
         .controls { display: flex; gap: 8px; margin-top: 12px; }
@@ -114,7 +113,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO INICIAL (Só carrega se não houver nada salvo)
         const fichaDefault = {
             "seg": ["Supino Inclinado Máq", "Chest Press Máq", "Pec Deck", "Elevação Lateral Máq", "Tríceps Corda"],
             "ter": ["Puxada Alta Frontal", "Remada Neutra", "Remada Unilateral", "Crucifixo Inverso Máq", "Rosca no Cabo"],
@@ -125,28 +123,22 @@
         };
 
         const nomesDias = { seg: "Segunda: Push", ter: "Terça: Pull", qua: "Quarta: Legs", qui: "Quinta: Descanso", sex: "Sexta: Upper", sab: "Sábado: Lower" };
-
         let fichaLocal = JSON.parse(localStorage.getItem('ficha_lucas')) || fichaDefault;
         const diaHojeKey = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()] || "seg";
 
         function renderApp() {
             const container = document.getElementById('app');
             let html = '';
-
             Object.entries(fichaLocal).forEach(([key, listaEx]) => {
                 const taAberto = (key === diaHojeKey) ? 'aberto' : '';
-                const temEx = listaEx.length > 0;
-                
                 html += `
                 <div class="dia-secao ${key} ${taAberto}" id="secao-${key}">
                     <div class="dia-header" onclick="toggleDia('${key}')">
                         <div><div class="dia-titulo">${nomesDias[key]}</div><span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span></div>
-                        ${temEx ? '<span class="seta">▼</span>' : ''}
+                        ${listaEx.length > 0 ? '<span class="seta">▼</span>' : ''}
                     </div>
                     <div class="dia-conteudo">
-                        <div id="lista-${key}">
-                            ${listaEx.map((exNome, idx) => renderCard(key, exNome, idx)).join('')}
-                        </div>
+                        <div id="lista-${key}">${listaEx.map((exNome, idx) => renderCard(key, exNome, idx)).join('')}</div>
                         <button class="btn-novo-ex" onclick="addExercicio('${key}')">+ Novo Exercício</button>
                     </div>
                 </div>`;
@@ -173,7 +165,7 @@
                 </div>
                 <div id="cont-${idU}">${series.map((s, i) => renderSerie(idU, i, s.c, s.r, meta)).join('')}</div>
                 <input type="text" class="obs-input" placeholder="Adicionar observação..." value="${obs}" oninput="saveObs('${idU}', this.value)">
-                <div class="vol-ex-txt" id="vol-ex-${idU}">Vol: 0kg</div>
+                <div class="vol-ex-txt" id="vol-ex-${idU}">Carga Máx: 0kg</div>
                 <div class="controls">
                     <button class="btn btn-add" onclick="addS('${idU}')">+ Série</button>
                     <button class="btn btn-hist" onclick="toggleH('${idU}', '${diaKey}')">📊 Histórico</button>
@@ -197,40 +189,14 @@
             </div>`;
         }
 
-        // GERENCIAMENTO DE EXERCÍCIOS
-        window.addExercicio = (dia) => {
-            const nome = prompt("Nome do novo exercício:");
-            if(nome) {
-                fichaLocal[dia].push(nome);
-                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
-                renderApp();
-            }
-        };
-
-        window.removerExercicio = (dia, idx) => {
-            if(confirm("Deseja excluir este exercício permanentemente?")) {
-                fichaLocal[dia].splice(idx, 1);
-                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
-                renderApp();
-            }
-        };
-
-        window.editExNome = (dia, idx) => {
-            const novoNome = prompt("Editar nome:", fichaLocal[dia][idx]);
-            if(novoNome) {
-                fichaLocal[dia][idx] = novoNome;
-                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
-                renderApp();
-            }
-        };
-
+        window.addExercicio = (dia) => { const n = prompt("Nome:"); if(n) { fichaLocal[dia].push(n); localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal)); renderApp(); } };
+        window.removerExercicio = (dia, idx) => { if(confirm("Excluir?")) { fichaLocal[dia].splice(idx, 1); localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal)); renderApp(); } };
+        window.editExNome = (dia, idx) => { const n = prompt("Nome:", fichaLocal[dia][idx]); if(n) { fichaLocal[dia][idx] = n; localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal)); renderApp(); } };
         window.saveObs = (id, val) => localStorage.setItem(`${id}-obs`, val);
-
         window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
         window.addS = (id) => { document.getElementById(`cont-${id}`).insertAdjacentHTML('beforeend', renderSerie(id, document.getElementById(`cont-${id}`).children.length, '', '', null)); };
         window.remS = (id, btn) => { btn.parentElement.remove(); calcAll(); };
 
-        // CÁLCULOS E TIMER (Mantidos da versão anterior)
         window.calcAll = () => {
             Object.keys(fichaLocal).forEach(diaKey => {
                 let volDia = 0;
@@ -238,45 +204,30 @@
                     const id = `${diaKey}-ex-${idx}`;
                     const cont = document.getElementById(`cont-${id}`);
                     if(!cont) return;
-                    let volEx = 0, seriesData = [];
+                    let maxCarga = 0, volEx = 0, seriesData = [];
                     cont.querySelectorAll('.serie-row').forEach(row => {
                         const c = parseFloat(row.querySelectorAll('input')[0].value) || 0;
                         const r = parseFloat(row.querySelectorAll('input')[1].value) || 0;
+                        if(c > maxCarga) maxCarga = c;
                         volEx += (c * r);
                         seriesData.push({c, r});
                     });
-                    document.getElementById(`vol-ex-${id}`).innerText = `Volume: ${volEx.toLocaleString()}kg`;
+                    document.getElementById(`vol-ex-${id}`).innerText = `Carga Máx: ${maxCarga}kg`;
                     volDia += volEx;
                     localStorage.setItem(`${id}-series`, JSON.stringify(seriesData));
-                    if(volEx > 0) {
+                    if(seriesData.length > 0 && maxCarga > 0) {
                         const hoje = new Date().toLocaleDateString('pt-BR');
                         let h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]");
-                        if(h.length === 0 || h[0].d !== hoje) h.unshift({d: hoje, v: volEx, s: seriesData});
-                        else h[0] = {d: hoje, v: volEx, s: seriesData};
-                        localStorage.setItem(`${id}-h`, JSON.stringify(h.slice(0,10)));
+                        // Aqui salvamos o maxCarga (m) além do volume (v)
+                        const entry = {d: hoje, v: volEx, m: maxCarga, s: seriesData};
+                        if(h.length === 0 || h[0].d !== hoje) h.unshift(entry); else h[0] = entry;
+                        localStorage.setItem(`${id}-h`, JSON.stringify(h.slice(0,12)));
                     }
                 });
                 const vb = document.getElementById(`vol-dia-${diaKey}`);
                 if(vb) vb.innerText = `Vol: ${volDia.toLocaleString()}kg`;
             });
         };
-
-        // Lógica do Gráfico e Timer (Resumida para o código funcionar direto)
-        let countdown;
-        window.startTimer = (s) => {
-            clearInterval(countdown);
-            let timeLeft = s;
-            const container = document.getElementById('timer-container');
-            container.classList.remove('timer-finished');
-            countdown = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer-display').innerText = `00:${timeLeft.toString().padStart(2,'0')}`;
-                document.getElementById('timer-progress').style.width = `${((s - timeLeft) / s) * 100}%`;
-                if(timeLeft <= 0) { clearInterval(countdown); container.classList.add('timer-finished'); document.getElementById('timer-display').innerText = "BORA!"; }
-            }, 1000);
-        };
-        window.resetTimer = () => { clearInterval(countdown); document.getElementById('timer-display').innerText = "00:00"; document.getElementById('timer-progress').style.width = "0%"; document.getElementById('timer-container').classList.remove('timer-finished'); };
-        window.customTimer = () => { const v = prompt("Segundos:"); if(v) startTimer(parseInt(v)); };
 
         const charts = {};
         window.toggleH = (id, corKey) => {
@@ -287,8 +238,47 @@
             const ctx = document.getElementById(`chart-${id}`).getContext('2d');
             if(charts[id]) charts[id].destroy();
             const cores = { seg: '#007AFF', ter: '#5856D6', qua: '#34C759', qui: '#8e8e93', sex: '#FF9500', sab: '#FF2D55' };
-            charts[id] = new Chart(ctx, { type: 'line', data: { labels: h.map(i => i.d.slice(0,5)), datasets: [{ data: h.map(i => i.v), borderColor: cores[corKey], tension: 0.4, fill: false }] }, options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
+            
+            charts[id] = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: h.map(i => i.d.slice(0,5)), 
+                    datasets: [{ 
+                        label: 'Carga Máx (kg)',
+                        data: h.map(i => i.m || 0), // Usa a carga máxima salva
+                        borderColor: cores[corKey], 
+                        backgroundColor: cores[corKey] + '22',
+                        tension: 0.4, 
+                        fill: true,
+                        borderWidth: 3
+                    }] 
+                }, 
+                options: { 
+                    plugins: { legend: { display: false } }, 
+                    scales: { y: { ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } } 
+                } 
+            });
+            document.getElementById(`lista-h-${id}`).innerHTML = h.reverse().map(i => `
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; border-top:1px solid #eee; padding-top:4px;">
+                    <strong>${i.d}</strong> <span>Máx: ${i.m || 0}kg</span>
+                </div>`).join('');
         };
+
+        let countdown;
+        window.startTimer = (s) => {
+            clearInterval(countdown);
+            let t = s;
+            const container = document.getElementById('timer-container');
+            container.classList.remove('timer-finished');
+            countdown = setInterval(() => {
+                t--;
+                document.getElementById('timer-display').innerText = `00:${t.toString().padStart(2,'0')}`;
+                document.getElementById('timer-progress').style.width = `${((s - t) / s) * 100}%`;
+                if(t <= 0) { clearInterval(countdown); container.classList.add('timer-finished'); document.getElementById('timer-display').innerText = "BORA!"; }
+            }, 1000);
+        };
+        window.resetTimer = () => { clearInterval(countdown); document.getElementById('timer-display').innerText = "00:00"; document.getElementById('timer-progress').style.width = "0%"; document.getElementById('timer-container').classList.remove('timer-finished'); };
+        window.customTimer = () => { const v = prompt("Segundos:"); if(v) startTimer(parseInt(v)); };
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
         renderApp();
