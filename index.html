@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Treino Lucas Morais</title>
     
-    <link rel="apple-touch-icon" href="logo-treino.png?v=1">
-
+    <link rel="apple-touch-icon" href="icon.png?v=3">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -20,26 +18,17 @@
             --radius: 20px;
         }
 
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background-color: #e5e5ea; 
-            margin: 0; padding: 0; 
-            display: flex; justify-content: center; 
-        }
+        body { font-family: -apple-system, system-ui, sans-serif; background-color: #e5e5ea; margin: 0; padding: 0; display: flex; justify-content: center; }
 
-        /* TIMER FLUTUANTE NA BASE */
         #timer-container {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 100%; max-width: 450px; 
-            background: rgba(28, 28, 30, 0.95); 
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            color: white; padding: 15px 20px; 
-            box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; padding: 15px 20px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
             padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
-        #timer-display { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 70px; }
+        #timer-display { font-size: 22px; font-weight: 800; min-width: 70px; }
         .timer-controls { display: flex; gap: 6px; }
         .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .timer-finished { animation: pulse-red 1s infinite; }
@@ -48,8 +37,7 @@
 
         .container {
             width: 100%; max-width: 450px; background-color: var(--bg); min-height: 100vh;
-            padding: 20px; padding-bottom: 150px; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
+            padding: 20px; padding-bottom: 150px; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
             display: flex; flex-direction: column;
         }
 
@@ -67,37 +55,40 @@
         .dia-secao.aberto .seta { transform: rotate(180deg); }
         .seta { font-size: 12px; color: #aeaeb2; transition: transform 0.3s; }
 
-        .card { background: var(--card-bg); border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-        .ex-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .ex-nome { font-weight: 700; font-size: 15px; color: #1c1c1e; }
-        .btn-edit-name { background: none; border: none; font-size: 12px; opacity: 0.3; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); position: relative; }
+        .ex-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .ex-nome { font-weight: 700; font-size: 15px; color: #1c1c1e; flex: 1; }
+        
+        .btn-icon { background: none; border: none; font-size: 14px; opacity: 0.3; padding: 5px; cursor: pointer; }
+        .btn-icon:hover { opacity: 1; }
 
         .serie-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; background: #f8f8fa; padding: 6px; border-radius: 10px; }
         .serie-num { font-size: 9px; font-weight: 800; color: #aeaeb2; width: 20px; text-align: center; }
         .input-group { flex: 1; }
         label { font-size: 8px; text-transform: uppercase; color: #8e8e93; font-weight: 700; margin-bottom: 2px; display: block; }
-        input { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 16px; text-align: center; }
+        input { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 15px; text-align: center; box-sizing: border-box; }
+
+        /* OBSERVAÇÃO */
+        .obs-input { width: 100%; background: none; border: none; border-bottom: 1px solid #eee; font-size: 11px; color: #666; padding: 5px 0; margin-top: 10px; text-align: left; font-style: italic; }
 
         .controls { display: flex; gap: 8px; margin-top: 12px; }
         .btn { border: none; border-radius: 10px; padding: 8px; font-size: 11px; font-weight: 700; cursor: pointer; flex: 1; }
         .btn-add { background: #1c1c1e; color: #fff; }
         .btn-hist { background: #f2f2f7; color: #007AFF; }
+        .btn-novo-ex { background: #fff; color: #1c1c1e; border: 1px dashed #ccc; margin-top: 10px; width: 100%; padding: 12px; border-radius: 15px; font-weight: 600; }
 
         .vol-ex-txt { font-size: 10px; color: #aeaeb2; margin-top: 8px; text-align: right; font-weight: 600; }
-        
-        /* BOX HISTÓRICO E GRÁFICO */
         .hist-box { display: none; margin-top: 15px; padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 12px; }
-        .chart-container { width: 100%; height: 180px; margin-bottom: 10px; }
+        .chart-container { width: 100%; height: 160px; }
 
-        /* CORES POR DIA */
+        footer { margin-top: auto; padding: 30px 0 10px; text-align: center; font-size: 10px; color: #aeaeb2; letter-spacing: 0.5px; }
+
         .seg .dia-titulo { color: var(--push); }
         .ter .dia-titulo { color: var(--pull); }
         .qua .dia-titulo { color: var(--legs); }
         .qui .dia-titulo { color: var(--rest); }
         .sex .dia-titulo { color: var(--upper); }
         .sab .dia-titulo { color: var(--lower); }
-
-        footer { margin-top: auto; padding: 30px 0 10px; text-align: center; font-size: 10px; color: #aeaeb2; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -105,7 +96,7 @@
     <div class="container">
         <div class="header-app">
             <div class="subtitle">Chikorita Gym</div>
-            <h1>Treino PPL Upper Lower</h1>
+            <h1>Meu Treino</h1>
         </div>
         <div id="app"></div>
         <footer>produced by Lucas Morais</footer>
@@ -123,111 +114,78 @@
     </div>
 
     <script>
-        // REGISTRO DO SERVICE WORKER (PWA - Para funcionar offline)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-
-        const fichaBase = {
-            "seg": { t: "Segunda: Push", l: ["Supino Inclinado Máq", "Chest Press Máq", "Pec Deck", "Elevação Lateral Máq", "Tríceps Corda"]},
-            "ter": { t: "Terça: Pull", l: ["Puxada Alta Frontal", "Remada Neutra", "Remada Unilateral", "Crucifixo Inverso Máq", "Rosca no Cabo"]},
-            "qua": { t: "Quarta: Legs (Quad)", l: ["Hack ou Leg 45°", "Leg Horizontal", "Cadeira Extensora", "Cadeira Flexora", "Panturrilha no Leg"]},
-            "qui": { t: "Quinta: Descanso", l: []},
-            "sex": { t: "Sexta: Upper", l: ["Shoulder Press Máq", "Puxada Triângulo", "Chest Press Neutro", "Dip Machine", "Rosca Scott Máq"]},
-            "sab": { t: "Sábado: Lower (Post)", l: ["Mesa Flexora", "Cadeira Flexora (Sent)", "Elevação Pélvica Máq", "Cadeira Abdutora", "Panturrilha Sentado"]}
+        // CONFIGURAÇÃO INICIAL (Só carrega se não houver nada salvo)
+        const fichaDefault = {
+            "seg": ["Supino Inclinado Máq", "Chest Press Máq", "Pec Deck", "Elevação Lateral Máq", "Tríceps Corda"],
+            "ter": ["Puxada Alta Frontal", "Remada Neutra", "Remada Unilateral", "Crucifixo Inverso Máq", "Rosca no Cabo"],
+            "qua": ["Hack ou Leg 45°", "Leg Horizontal", "Cadeira Extensora", "Cadeira Flexora", "Panturrilha no Leg"],
+            "qui": [],
+            "sex": ["Shoulder Press Máq", "Puxada Triângulo", "Chest Press Neutro", "Dip Machine", "Rosca Scott Máq"],
+            "sab": ["Mesa Flexora", "Cadeira Flexora (Sent)", "Elevação Pélvica Máq", "Cadeira Abdutora", "Panturrilha Sentado"]
         };
 
-        let countdown;
-        let timerTotal;
-        const charts = {};
+        const nomesDias = { seg: "Segunda: Push", ter: "Terça: Pull", qua: "Quarta: Legs", qui: "Quinta: Descanso", sex: "Sexta: Upper", sab: "Sábado: Lower" };
 
-        // TIMER
-        function startTimer(seconds) {
-            resetTimer();
-            timerTotal = seconds;
-            let timeLeft = seconds;
-            const display = document.getElementById('timer-display');
-            const progress = document.getElementById('timer-progress');
-            const container = document.getElementById('timer-container');
+        let fichaLocal = JSON.parse(localStorage.getItem('ficha_lucas')) || fichaDefault;
+        const diaHojeKey = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()] || "seg";
 
-            countdown = setInterval(() => {
-                timeLeft--;
-                const mins = Math.floor(timeLeft / 60);
-                const secs = timeLeft % 60;
-                display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                progress.style.width = `${((timerTotal - timeLeft) / timerTotal) * 100}%`;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    container.classList.add('timer-finished');
-                    display.innerText = "BORA!";
-                }
-            }, 1000);
-        }
-
-        function resetTimer() {
-            clearInterval(countdown);
-            document.getElementById('timer-display').innerText = "00:00";
-            document.getElementById('timer-progress').style.width = "0%";
-            document.getElementById('timer-container').classList.remove('timer-finished');
-        }
-
-        function customTimer() {
-            const val = prompt("Segundos:");
-            if (val) startTimer(parseInt(val));
-        }
-
-        // APP LOGIC
-        const diaHojeNum = new Date().getDay();
-        const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
-        const diaHojeKey = diasMap[diaHojeNum] || "seg";
-
-        const renderApp = () => {
+        function renderApp() {
             const container = document.getElementById('app');
             let html = '';
 
-            Object.entries(fichaBase).forEach(([key, dia]) => {
+            Object.entries(fichaLocal).forEach(([key, listaEx]) => {
                 const taAberto = (key === diaHojeKey) ? 'aberto' : '';
-                const temExercicios = dia.l.length > 0;
+                const temEx = listaEx.length > 0;
                 
                 html += `
                 <div class="dia-secao ${key} ${taAberto}" id="secao-${key}">
-                    <div class="dia-header" onclick="${temExercicios ? `toggleDia('${key}')` : ''}">
-                        <div><div class="dia-titulo">${dia.t}</div><span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span></div>
-                        ${temExercicios ? '<span class="seta">▼</span>' : ''}
+                    <div class="dia-header" onclick="toggleDia('${key}')">
+                        <div><div class="dia-titulo">${nomesDias[key]}</div><span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span></div>
+                        ${temEx ? '<span class="seta">▼</span>' : ''}
                     </div>
-                    <div class="dia-conteudo">`;
-                
-                dia.l.forEach((exOriginal, idx) => {
-                    const idU = `${key}-ex-${idx}`;
-                    const exNome = localStorage.getItem(`${idU}-name`) || exOriginal;
-                    const series = JSON.parse(localStorage.getItem(`${idU}-series`) || "[{}]");
-                    const h = JSON.parse(localStorage.getItem(`${idU}-h`) || "[]");
-                    const meta = h.length > 0 ? h[0] : null; 
-                    
-                    html += `
-                    <div class="card">
-                        <div class="ex-header"><span class="ex-nome" id="label-${idU}">${exNome}</span><button class="btn-edit-name" onclick="editName('${idU}')">✏️</button></div>
-                        <div id="cont-${idU}">${series.map((s, i) => renderSerie(idU, i, s.c, s.r, meta)).join('')}</div>
-                        <div class="vol-ex-txt" id="vol-ex-${idU}">Volume: 0kg</div>
-                        <div class="controls">
-                            <button class="btn btn-add" onclick="addS('${idU}')">+ Série</button>
-                            <button class="btn btn-hist" onclick="toggleH('${idU}', '${key}')">Histórico 📊</button>
+                    <div class="dia-conteudo">
+                        <div id="lista-${key}">
+                            ${listaEx.map((exNome, idx) => renderCard(key, exNome, idx)).join('')}
                         </div>
-                        <div id="h-${idU}" class="hist-box">
-                            <div class="chart-container"><canvas id="chart-${idU}"></canvas></div>
-                            <div id="lista-h-${idU}"></div>
-                        </div>
-                    </div>`;
-                });
-                html += `</div></div>`;
+                        <button class="btn-novo-ex" onclick="addExercicio('${key}')">+ Novo Exercício</button>
+                    </div>
+                </div>`;
             });
             container.innerHTML = html;
             calcAll();
-        };
+        }
 
-        window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
+        function renderCard(diaKey, exNome, idx) {
+            const idU = `${diaKey}-ex-${idx}`;
+            const series = JSON.parse(localStorage.getItem(`${idU}-series`) || "[{}]");
+            const obs = localStorage.getItem(`${idU}-obs`) || "";
+            const h = JSON.parse(localStorage.getItem(`${idU}-h`) || "[]");
+            const meta = h.length > 0 ? h[0] : null;
 
-        window.renderSerie = (id, i, c, r, meta) => {
+            return `
+            <div class="card" id="card-${idU}">
+                <div class="ex-header">
+                    <span class="ex-nome" onclick="editExNome('${diaKey}', ${idx})">${exNome}</span>
+                    <div>
+                        <button class="btn-icon" onclick="editExNome('${diaKey}', ${idx})">✏️</button>
+                        <button class="btn-icon" style="color:red; opacity:0.5" onclick="removerExercicio('${diaKey}', ${idx})">🗑️</button>
+                    </div>
+                </div>
+                <div id="cont-${idU}">${series.map((s, i) => renderSerie(idU, i, s.c, s.r, meta)).join('')}</div>
+                <input type="text" class="obs-input" placeholder="Adicionar observação..." value="${obs}" oninput="saveObs('${idU}', this.value)">
+                <div class="vol-ex-txt" id="vol-ex-${idU}">Vol: 0kg</div>
+                <div class="controls">
+                    <button class="btn btn-add" onclick="addS('${idU}')">+ Série</button>
+                    <button class="btn btn-hist" onclick="toggleH('${idU}', '${diaKey}')">📊 Histórico</button>
+                </div>
+                <div id="h-${idU}" class="hist-box">
+                    <div class="chart-container"><canvas id="chart-${idU}"></canvas></div>
+                    <div id="lista-h-${idU}"></div>
+                </div>
+            </div>`;
+        }
+
+        function renderSerie(id, i, c, r, meta) {
             let pCarga = (meta && meta.s && meta.s[i]) ? meta.s[i].c : "0";
             let pReps = (meta && meta.s && meta.s[i]) ? meta.s[i].r : "0";
             return `
@@ -239,24 +197,44 @@
             </div>`;
         }
 
-        window.editName = (id) => {
-            event.stopPropagation();
-            const old = document.getElementById(`label-${id}`).innerText;
-            const res = prompt("Nome:", old);
-            if(res){ localStorage.setItem(`${id}-name`, res); document.getElementById(`label-${id}`).innerText = res; }
+        // GERENCIAMENTO DE EXERCÍCIOS
+        window.addExercicio = (dia) => {
+            const nome = prompt("Nome do novo exercício:");
+            if(nome) {
+                fichaLocal[dia].push(nome);
+                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
+                renderApp();
+            }
         };
 
-        window.addS = (id) => {
-            const cont = document.getElementById(`cont-${id}`);
-            cont.insertAdjacentHTML('beforeend', renderSerie(id, cont.children.length, '', '', null));
+        window.removerExercicio = (dia, idx) => {
+            if(confirm("Deseja excluir este exercício permanentemente?")) {
+                fichaLocal[dia].splice(idx, 1);
+                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
+                renderApp();
+            }
         };
 
+        window.editExNome = (dia, idx) => {
+            const novoNome = prompt("Editar nome:", fichaLocal[dia][idx]);
+            if(novoNome) {
+                fichaLocal[dia][idx] = novoNome;
+                localStorage.setItem('ficha_lucas', JSON.stringify(fichaLocal));
+                renderApp();
+            }
+        };
+
+        window.saveObs = (id, val) => localStorage.setItem(`${id}-obs`, val);
+
+        window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
+        window.addS = (id) => { document.getElementById(`cont-${id}`).insertAdjacentHTML('beforeend', renderSerie(id, document.getElementById(`cont-${id}`).children.length, '', '', null)); };
         window.remS = (id, btn) => { btn.parentElement.remove(); calcAll(); };
 
+        // CÁLCULOS E TIMER (Mantidos da versão anterior)
         window.calcAll = () => {
-            Object.keys(fichaBase).forEach(diaKey => {
+            Object.keys(fichaLocal).forEach(diaKey => {
                 let volDia = 0;
-                fichaBase[diaKey].l.forEach((_, idx) => {
+                fichaLocal[diaKey].forEach((_, idx) => {
                     const id = `${diaKey}-ex-${idx}`;
                     const cont = document.getElementById(`cont-${id}`);
                     if(!cont) return;
@@ -283,49 +261,36 @@
             });
         };
 
+        // Lógica do Gráfico e Timer (Resumida para o código funcionar direto)
+        let countdown;
+        window.startTimer = (s) => {
+            clearInterval(countdown);
+            let timeLeft = s;
+            const container = document.getElementById('timer-container');
+            container.classList.remove('timer-finished');
+            countdown = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = `00:${timeLeft.toString().padStart(2,'0')}`;
+                document.getElementById('timer-progress').style.width = `${((s - timeLeft) / s) * 100}%`;
+                if(timeLeft <= 0) { clearInterval(countdown); container.classList.add('timer-finished'); document.getElementById('timer-display').innerText = "BORA!"; }
+            }, 1000);
+        };
+        window.resetTimer = () => { clearInterval(countdown); document.getElementById('timer-display').innerText = "00:00"; document.getElementById('timer-progress').style.width = "0%"; document.getElementById('timer-container').classList.remove('timer-finished'); };
+        window.customTimer = () => { const v = prompt("Segundos:"); if(v) startTimer(parseInt(v)); };
+
+        const charts = {};
         window.toggleH = (id, corKey) => {
             const box = document.getElementById(`h-${id}`);
             if(box.style.display === 'block') { box.style.display = 'none'; return; }
             box.style.display = 'block';
-
             const h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]").reverse();
             const ctx = document.getElementById(`chart-${id}`).getContext('2d');
-            const cores = { seg: '#007AFF', ter: '#5856D6', qua: '#34C759', qui: '#8e8e93', sex: '#FF9500', sab: '#FF2D55' };
-
             if(charts[id]) charts[id].destroy();
-
-            charts[id] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: h.map(i => i.d.split('/')[0] + '/' + i.d.split('/')[1]),
-                    datasets: [{
-                        label: 'Volume (kg)',
-                        data: h.map(i => i.v),
-                        borderColor: cores[corKey],
-                        backgroundColor: cores[corKey] + '22',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { beginAtZero: false, grid: { display: false }, ticks: { font: { size: 9 } } },
-                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
-                    }
-                }
-            });
-
-            document.getElementById(`lista-h-${id}`).innerHTML = h.reverse().map(i => `
-                <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; border-top:1px solid #eee; padding-top:4px;">
-                    <strong>${i.d}</strong> <span>${i.v.toLocaleString()} kg</span>
-                </div>`).join('');
+            const cores = { seg: '#007AFF', ter: '#5856D6', qua: '#34C759', qui: '#8e8e93', sex: '#FF9500', sab: '#FF2D55' };
+            charts[id] = new Chart(ctx, { type: 'line', data: { labels: h.map(i => i.d.slice(0,5)), datasets: [{ data: h.map(i => i.v), borderColor: cores[corKey], tension: 0.4, fill: false }] }, options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
         };
 
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
         renderApp();
     </script>
 </body>
