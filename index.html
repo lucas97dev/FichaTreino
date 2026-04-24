@@ -13,24 +13,29 @@
 
         body { font-family: -apple-system, system-ui, sans-serif; background-color: #e5e5ea; margin: 0; padding: 0; display: flex; justify-content: center; }
 
-        /* TIMER FIXO NO TOPO */
+        /* TIMER FLUTUANTE NA BASE */
         #timer-container {
-            position: sticky; top: 0; z-index: 100;
-            width: 100%; max-width: 450px; background: #1c1c1e; color: white;
-            padding: 15px 20px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            z-index: 1000; width: 100%; max-width: 450px; 
+            background: rgba(28, 28, 30, 0.95); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; padding: 15px 20px; 
+            box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+            padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* Ajuste para barra do iPhone */
         }
-        #timer-display { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
-        .timer-controls { display: flex; gap: 8px; }
-        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
-        .timer-btn.active { background: var(--push); }
-        #timer-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--push); width: 0%; transition: width 1s linear; }
+        #timer-display { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 70px; }
+        .timer-controls { display: flex; gap: 6px; }
+        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .timer-finished { animation: pulse-red 1s infinite; }
-        @keyframes pulse-red { 0% { background: #1c1c1e; } 50% { background: #ff3b30; } 100% { background: #1c1c1e; } }
+        @keyframes pulse-red { 0% { background: rgba(28,28,30,0.95); } 50% { background: #ff3b30; } 100% { background: rgba(28,28,30,0.95); } }
+        #timer-progress { position: absolute; top: 0; left: 0; height: 3px; background: var(--push); width: 0%; transition: width 1s linear; }
 
         .container {
             width: 100%; max-width: 450px; background-color: var(--bg); min-height: 100vh;
-            padding: 20px; padding-bottom: 40px; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
+            padding: 20px; padding-bottom: 120px; /* Aumentado para o timer não cobrir o footer */
+            box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
             display: flex; flex-direction: column;
         }
 
@@ -57,7 +62,7 @@
         .serie-num { font-size: 9px; font-weight: 800; color: #aeaeb2; width: 20px; text-align: center; }
         .input-group { flex: 1; }
         label { font-size: 8px; text-transform: uppercase; color: #8e8e93; font-weight: 700; margin-bottom: 2px; display: block; }
-        input { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 15px; text-align: center; }
+        input { width: 100%; padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 16px; text-align: center; }
 
         .controls { display: flex; gap: 8px; margin-top: 12px; }
         .btn { border: none; border-radius: 10px; padding: 8px; font-size: 11px; font-weight: 700; cursor: pointer; flex: 1; }
@@ -79,17 +84,6 @@
 </head>
 <body>
 
-    <div id="timer-container">
-        <div id="timer-display">00:00</div>
-        <div class="timer-controls">
-            <button class="timer-btn" onclick="startTimer(60)">60s</button>
-            <button class="timer-btn" onclick="startTimer(90)">90s</button>
-            <button class="timer-btn" onclick="customTimer()">Alt</button>
-            <button class="timer-btn" style="background:#ff3b30" onclick="resetTimer()">✕</button>
-        </div>
-        <div id="timer-progress"></div>
-    </div>
-
     <div class="container">
         <div class="header-app">
             <div class="subtitle">Chikorita Gym</div>
@@ -98,6 +92,17 @@
         
         <div id="app"></div>
         <footer>produced by Lucas Morais</footer>
+    </div>
+
+    <div id="timer-container">
+        <div id="timer-progress"></div>
+        <div id="timer-display">00:00</div>
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="startTimer(60)">60s</button>
+            <button class="timer-btn" onclick="startTimer(90)">90s</button>
+            <button class="timer-btn" onclick="customTimer()">Alt</button>
+            <button class="timer-btn" style="background:#ff3b30" onclick="resetTimer()">✕</button>
+        </div>
     </div>
 
     <script>
@@ -110,7 +115,6 @@
             "sab": { t: "Sábado: Lower (Post)", l: ["Mesa Flexora", "Cadeira Flexora (Sent)", "Elevação Pélvica Máq", "Cadeira Abdutora", "Panturrilha Sentado"]}
         };
 
-        // LÓGICA DO TIMER
         let countdown;
         let timerTotal;
 
@@ -132,7 +136,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     container.classList.add('timer-finished');
-                    display.innerText = "TREINAR!";
+                    display.innerText = "BORA!";
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             }, 1000);
@@ -146,11 +150,10 @@
         }
 
         function customTimer() {
-            const val = prompt("Quantos segundos de descanso?");
+            const val = prompt("Segundos de descanso:");
             if (val) startTimer(parseInt(val));
         }
 
-        // LÓGICA DO APP
         const diaHojeNum = new Date().getDay();
         const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
         const diaHojeKey = diasMap[diaHojeNum] || "seg";
@@ -168,7 +171,7 @@
                     <div class="dia-header" onclick="${temExercicios ? `toggleDia('${key}')` : ''}">
                         <div>
                             <div class="dia-titulo">${dia.t}</div>
-                            ${temExercicios ? `<span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span>` : '<span style="font-size:10px; color:#aeaeb2">Recuperação 😴</span>'}
+                            ${temExercicios ? `<span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span>` : '<span style="font-size:10px; color:#aeaeb2">Descanso 😴</span>'}
                         </div>
                         ${temExercicios ? '<span class="seta">▼</span>' : ''}
                     </div>
