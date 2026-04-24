@@ -1,0 +1,21 @@
+{
+  "name": "Treino Lucas Morais",
+  "short_name": "Treino",
+  "description": "Meu app de treinos personalizado",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007AFF",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/007AFF/ffffff?text=T",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/007AFF/ffffff?text=Treino",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
