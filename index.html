@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Treino Lucas Morais</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --bg: #f2f2f7; --card-bg: #ffffff;
@@ -12,27 +18,36 @@
             --radius: 20px;
         }
 
-        body { font-family: -apple-system, system-ui, sans-serif; background-color: #e5e5ea; margin: 0; padding: 0; display: flex; justify-content: center; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background-color: #e5e5ea; 
+            margin: 0; padding: 0; 
+            display: flex; justify-content: center; 
+        }
 
-        /* TIMER NO RODAPÉ */
+        /* TIMER FLUTUANTE NA BASE */
         #timer-container {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 100%; max-width: 450px; 
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            color: white; padding: 15px 20px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
-            border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+            background: rgba(28, 28, 30, 0.95); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; padding: 15px 20px; 
+            box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
             padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
-        #timer-display { font-size: 22px; font-weight: 800; min-width: 70px; }
+        #timer-display { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 70px; }
         .timer-controls { display: flex; gap: 6px; }
-        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .timer-finished { animation: pulse-red 1s infinite; }
         @keyframes pulse-red { 0% { background: rgba(28,28,30,0.95); } 50% { background: #ff3b30; } 100% { background: rgba(28,28,30,0.95); } }
         #timer-progress { position: absolute; top: 0; left: 0; height: 3px; background: var(--push); width: 0%; transition: width 1s linear; }
 
         .container {
             width: 100%; max-width: 450px; background-color: var(--bg); min-height: 100vh;
-            padding: 20px; padding-bottom: 150px; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
+            padding: 20px; padding-bottom: 150px; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative;
             display: flex; flex-direction: column;
         }
 
@@ -72,6 +87,7 @@
         .hist-box { display: none; margin-top: 15px; padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 12px; }
         .chart-container { width: 100%; height: 180px; margin-bottom: 10px; }
 
+        /* CORES POR DIA */
         .seg .dia-titulo { color: var(--push); }
         .ter .dia-titulo { color: var(--pull); }
         .qua .dia-titulo { color: var(--legs); }
@@ -84,6 +100,15 @@
 </head>
 <body>
 
+    <div class="container">
+        <div class="header-app">
+            <div class="subtitle">Chikorita Gym</div>
+            <h1>Meu Treino</h1>
+        </div>
+        <div id="app"></div>
+        <footer>produced by Lucas Morais</footer>
+    </div>
+
     <div id="timer-container">
         <div id="timer-progress"></div>
         <div id="timer-display">00:00</div>
@@ -95,16 +120,12 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="header-app">
-            <div class="subtitle">Chikorita Gym</div>
-            <h1>DIVISÃO ATUAL DE TREINO</h1>
-        </div>
-        <div id="app"></div>
-        <footer>produced by Lucas Morais</footer>
-    </div>
-
     <script>
+        // REGISTRO DO SERVICE WORKER (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
         const fichaBase = {
             "seg": { t: "Segunda: Push", l: ["Supino Inclinado Máq", "Chest Press Máq", "Pec Deck", "Elevação Lateral Máq", "Tríceps Corda"]},
             "ter": { t: "Terça: Pull", l: ["Puxada Alta Frontal", "Remada Neutra", "Remada Unilateral", "Crucifixo Inverso Máq", "Rosca no Cabo"]},
@@ -116,9 +137,9 @@
 
         let countdown;
         let timerTotal;
-        const charts = {}; // Para armazenar as instâncias dos gráficos
+        const charts = {};
 
-        // FUNÇÕES DO TIMER
+        // TIMER
         function startTimer(seconds) {
             resetTimer();
             timerTotal = seconds;
@@ -153,7 +174,7 @@
             if (val) startTimer(parseInt(val));
         }
 
-        // LÓGICA DO APP
+        // APP LOGIC
         const diaHojeNum = new Date().getDay();
         const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
         const diaHojeKey = diasMap[diaHojeNum] || "seg";
@@ -179,7 +200,7 @@
                     const exNome = localStorage.getItem(`${idU}-name`) || exOriginal;
                     const series = JSON.parse(localStorage.getItem(`${idU}-series`) || "[{}]");
                     const h = JSON.parse(localStorage.getItem(`${idU}-h`) || "[]");
-                    const meta = h.length > 0 ? h[0] : null; // Pega o último treino do histórico
+                    const meta = h.length > 0 ? h[0] : null; 
                     
                     html += `
                     <div class="card">
@@ -205,7 +226,6 @@
         window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
 
         window.renderSerie = (id, i, c, r, meta) => {
-            // Se houver meta do histórico, coloca como placeholder
             let pCarga = (meta && meta.s && meta.s[i]) ? meta.s[i].c : "0";
             let pReps = (meta && meta.s && meta.s[i]) ? meta.s[i].r : "0";
             return `
@@ -266,7 +286,7 @@
             if(box.style.display === 'block') { box.style.display = 'none'; return; }
             box.style.display = 'block';
 
-            const h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]").reverse(); // Reverte para o gráfico ir da esq para dir
+            const h = JSON.parse(localStorage.getItem(`${id}-h`) || "[]").reverse();
             const ctx = document.getElementById(`chart-${id}`).getContext('2d');
             const cores = { seg: '#007AFF', ter: '#5856D6', qua: '#34C759', qui: '#8e8e93', sex: '#FF9500', sab: '#FF2D55' };
 
