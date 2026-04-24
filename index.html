@@ -7,11 +7,26 @@
     <style>
         :root {
             --bg: #f2f2f7; --card-bg: #ffffff;
-            --push: #007AFF; --pull: #5856D6; --legs: #34C759; --upper: #FF9500; --lower: #FF2D55;
+            --push: #007AFF; --pull: #5856D6; --legs: #34C759; --upper: #FF9500; --lower: #FF2D55; --rest: #8e8e93;
             --radius: 20px;
         }
 
         body { font-family: -apple-system, system-ui, sans-serif; background-color: #e5e5ea; margin: 0; padding: 0; display: flex; justify-content: center; }
+
+        /* TIMER FIXO NO TOPO */
+        #timer-container {
+            position: sticky; top: 0; z-index: 100;
+            width: 100%; max-width: 450px; background: #1c1c1e; color: white;
+            padding: 15px 20px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        #timer-display { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .timer-controls { display: flex; gap: 8px; }
+        .timer-btn { background: #3a3a3c; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .timer-btn.active { background: var(--push); }
+        #timer-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--push); width: 0%; transition: width 1s linear; }
+        .timer-finished { animation: pulse-red 1s infinite; }
+        @keyframes pulse-red { 0% { background: #1c1c1e; } 50% { background: #ff3b30; } 100% { background: #1c1c1e; } }
 
         .container {
             width: 100%; max-width: 450px; background-color: var(--bg); min-height: 100vh;
@@ -19,30 +34,20 @@
             display: flex; flex-direction: column;
         }
 
-        .header-app { text-align: left; margin-bottom: 25px; padding-left: 5px; }
+        .header-app { text-align: left; margin: 20px 0 25px 5px; }
         h1 { font-size: 28px; font-weight: 800; margin: 5px 0; letter-spacing: -1px; }
         .subtitle { font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
-        /* ESTILO DO ACORDEÃO */
         .dia-secao { margin-bottom: 15px; border-radius: var(--radius); overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        
-        .dia-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 18px; cursor: pointer; transition: background 0.2s;
-        }
-        .dia-header:active { background: #f9f9f9; }
-        
+        .dia-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; }
         .dia-titulo { font-size: 18px; font-weight: 800; color: #1c1c1e; }
         .vol-badge { font-size: 10px; font-weight: 800; color: #8e8e93; border: 1px solid #eee; padding: 3px 8px; border-radius: 10px; }
 
-        /* CONTEÚDO ESCONDIDO */
         .dia-conteudo { display: none; padding: 10px; background: var(--bg); border-top: 1px solid #f2f2f7; }
         .dia-secao.aberto .dia-conteudo { display: block; }
         .dia-secao.aberto .seta { transform: rotate(180deg); }
-
         .seta { font-size: 12px; color: #aeaeb2; transition: transform 0.3s; }
 
-        /* CARTÕES DE EXERCÍCIO */
         .card { background: var(--card-bg); border-radius: 16px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .ex-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .ex-nome { font-weight: 700; font-size: 15px; color: #1c1c1e; }
@@ -62,17 +67,28 @@
         .vol-ex-txt { font-size: 10px; color: #aeaeb2; margin-top: 8px; text-align: right; font-weight: 600; }
         .hist-box { display: none; margin-top: 10px; font-size: 10px; padding: 10px; background: #fff; border: 1px solid #eee; border-radius: 10px; }
 
-        /* CORES POR DIA */
         .seg .dia-titulo { color: var(--push); }
         .ter .dia-titulo { color: var(--pull); }
         .qua .dia-titulo { color: var(--legs); }
-        .qui .dia-titulo { color: var(--upper); }
-        .sex .dia-titulo { color: var(--lower); }
+        .qui .dia-titulo { color: var(--rest); }
+        .sex .dia-titulo { color: var(--upper); }
+        .sab .dia-titulo { color: var(--lower); }
 
         footer { margin-top: auto; padding: 30px 0 10px; text-align: center; font-size: 10px; color: #aeaeb2; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
+
+    <div id="timer-container">
+        <div id="timer-display">00:00</div>
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="startTimer(60)">60s</button>
+            <button class="timer-btn" onclick="startTimer(90)">90s</button>
+            <button class="timer-btn" onclick="customTimer()">Alt</button>
+            <button class="timer-btn" style="background:#ff3b30" onclick="resetTimer()">✕</button>
+        </div>
+        <div id="timer-progress"></div>
+    </div>
 
     <div class="container">
         <div class="header-app">
@@ -81,7 +97,6 @@
         </div>
         
         <div id="app"></div>
-
         <footer>produced by Lucas Morais</footer>
     </div>
 
@@ -90,12 +105,54 @@
             "seg": { t: "Segunda: Push", l: ["Supino Inclinado Máq", "Chest Press Máq", "Pec Deck", "Elevação Lateral Máq", "Tríceps Corda"]},
             "ter": { t: "Terça: Pull", l: ["Puxada Alta Frontal", "Remada Neutra", "Remada Unilateral", "Crucifixo Inverso Máq", "Rosca no Cabo"]},
             "qua": { t: "Quarta: Legs (Quad)", l: ["Hack ou Leg 45°", "Leg Horizontal", "Cadeira Extensora", "Cadeira Flexora", "Panturrilha no Leg"]},
-            "qui": { t: "Sexta: Upper", l: ["Shoulder Press Máq", "Puxada Triângulo", "Chest Press Neutro", "Dip Machine", "Rosca Scott Máq"]},
-            "sex": { t: "Sábado: Lower (Post)", l: ["Mesa Flexora", "Cadeira Flexora (Sent)", "Elevação Pélvica Máq", "Cadeira Abdutora", "Panturrilha Sentado"]}
+            "qui": { t: "Quinta: Descanso", l: []},
+            "sex": { t: "Sexta: Upper", l: ["Shoulder Press Máq", "Puxada Triângulo", "Chest Press Neutro", "Dip Machine", "Rosca Scott Máq"]},
+            "sab": { t: "Sábado: Lower (Post)", l: ["Mesa Flexora", "Cadeira Flexora (Sent)", "Elevação Pélvica Máq", "Cadeira Abdutora", "Panturrilha Sentado"]}
         };
 
+        // LÓGICA DO TIMER
+        let countdown;
+        let timerTotal;
+
+        function startTimer(seconds) {
+            resetTimer();
+            timerTotal = seconds;
+            let timeLeft = seconds;
+            const display = document.getElementById('timer-display');
+            const progress = document.getElementById('timer-progress');
+            const container = document.getElementById('timer-container');
+
+            countdown = setInterval(() => {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                progress.style.width = `${((timerTotal - timeLeft) / timerTotal) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    container.classList.add('timer-finished');
+                    display.innerText = "TREINAR!";
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(countdown);
+            document.getElementById('timer-display').innerText = "00:00";
+            document.getElementById('timer-progress').style.width = "0%";
+            document.getElementById('timer-container').classList.remove('timer-finished');
+        }
+
+        function customTimer() {
+            const val = prompt("Quantos segundos de descanso?");
+            if (val) startTimer(parseInt(val));
+        }
+
+        // LÓGICA DO APP
         const diaHojeNum = new Date().getDay();
-        const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex" };
+        const diasMap = { 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
         const diaHojeKey = diasMap[diaHojeNum] || "seg";
 
         const renderApp = () => {
@@ -104,15 +161,16 @@
 
             Object.entries(fichaBase).forEach(([key, dia]) => {
                 const taAberto = (key === diaHojeKey) ? 'aberto' : '';
+                const temExercicios = dia.l.length > 0;
                 
                 html += `
                 <div class="dia-secao ${key} ${taAberto}" id="secao-${key}">
-                    <div class="dia-header" onclick="toggleDia('${key}')">
+                    <div class="dia-header" onclick="${temExercicios ? `toggleDia('${key}')` : ''}">
                         <div>
                             <div class="dia-titulo">${dia.t}</div>
-                            <span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span>
+                            ${temExercicios ? `<span class="vol-badge" id="vol-dia-${key}">Vol: 0kg</span>` : '<span style="font-size:10px; color:#aeaeb2">Recuperação 😴</span>'}
                         </div>
-                        <span class="seta">▼</span>
+                        ${temExercicios ? '<span class="seta">▼</span>' : ''}
                     </div>
                     <div class="dia-conteudo">`;
                 
@@ -136,16 +194,13 @@
                         <div id="h-${idUnico}" class="hist-box"></div>
                     </div>`;
                 });
-                
                 html += `</div></div>`;
             });
             container.innerHTML = html;
             calcAll();
         };
 
-        window.toggleDia = (key) => {
-            document.getElementById(`secao-${key}`).classList.toggle('aberto');
-        };
+        window.toggleDia = (key) => document.getElementById(`secao-${key}`).classList.toggle('aberto');
 
         window.renderSerie = (id, i, c, r) => `
             <div class="serie-row">
@@ -197,7 +252,8 @@
                         localStorage.setItem(`${id}-h`, JSON.stringify(h.slice(0,5)));
                     }
                 });
-                document.getElementById(`vol-dia-${diaKey}`).innerText = `Vol: ${volDia.toLocaleString()}kg`;
+                const volBadge = document.getElementById(`vol-dia-${diaKey}`);
+                if(volBadge) volBadge.innerText = `Vol: ${volDia.toLocaleString()}kg`;
             });
         };
 
